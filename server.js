@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
 });
 
 // Route to get all posts
-app.get("/posts", (req, res) => {
+app.get("/", (req, res) => {
   db.query("SELECT * FROM posts ORDER BY date DESC", (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
