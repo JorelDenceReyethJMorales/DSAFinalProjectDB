@@ -3,7 +3,7 @@ const cors = require("cors");
 const mysql = require("mysql2");
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 8080; // Use environment-defined port
 
 const db = mysql.createConnection({
     host: "finalprojectdbzxc.database.windows.net", // Azure MySQL server name
@@ -13,8 +13,7 @@ const db = mysql.createConnection({
     ssl: {
       rejectUnauthorized: false // Ensure SSL is enabled
     }
-  });
-  
+});
 
 db.connect((err) => {
   if (err) {
@@ -27,6 +26,11 @@ db.connect((err) => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Welcome route
+app.get("/", (req, res) => {
+  res.send("Welcome to the Backend!");
+});
 
 // Route to get all posts
 app.get("/posts", (req, res) => {
