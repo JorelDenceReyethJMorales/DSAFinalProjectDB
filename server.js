@@ -3,7 +3,10 @@ const cors = require("cors");
 const sql = require("mssql"); // Import the mssql package
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 8080; // Use the PORT environment variable if set, otherwise default to 8080
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 // Azure SQL connection configuration
 const dbConfig = {
@@ -25,7 +28,9 @@ app.use(express.json());
 app.get("/posts", async (req, res) => {
   try {
     const pool = await sql.connect(dbConfig); // Connect to Azure SQL
-    const result = await pool.request().query("SELECT * FROM posts ORDER BY date DESC");
+    const result = await pool
+      .request()
+      .query("SELECT * FROM posts ORDER BY date DESC");
     res.json(result.recordset); // Return the query results
   } catch (err) {
     console.error("Error querying the database:", err.message);
@@ -45,7 +50,9 @@ app.post("/posts", async (req, res) => {
       .input("to", sql.NVarChar, to)
       .input("content", sql.NVarChar, content)
       .input("date", sql.DateTime, date)
-      .query("INSERT INTO posts (from_name, to_name, content, date) VALUES (@from, @to, @content, @date)");
+      .query(
+        "INSERT INTO posts (from_name, to_name, content, date) VALUES (@from, @to, @content, @date)"
+      );
 
     res.status(201).json({
       id: result.rowsAffected[0], // Get the affected row count or you can get the inserted ID if needed
@@ -58,9 +65,4 @@ app.post("/posts", async (req, res) => {
     console.error("Error inserting into the database:", err.message);
     res.status(500).json({ error: err.message });
   }
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
 });
