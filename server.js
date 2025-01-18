@@ -3,7 +3,6 @@ const cors = require("cors");
 const mysql = require("mysql2");
 
 const app = express();
-const port = 5000;
 
 const db = mysql.createConnection({
     host: "finalprojectdbzxc.database.windows.net", // Azure MySQL server name
@@ -61,7 +60,7 @@ app.post("/posts", (req, res) => {
   });
 });
 
-// Start the server
+const port = process.env.PORT || 8080;  // Azure assigns a dynamic port via the PORT variable
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
