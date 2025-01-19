@@ -29,7 +29,7 @@ app.use(express.json());
 
 // Welcome route
 app.get("/", (req, res) => {
-  res.send("Welcome to the Backend Niggas!");
+  res.send("Welcome to the Backend !");
 });
 
 // Route to get all posts
