@@ -3,16 +3,16 @@ const cors = require("cors");
 const mysql = require("mysql2");
 
 const app = express();
-const port = process.env.PORT || 8080; // Use environment-defined port
+const port = process.env.PORT || 5000; // Use environment-defined port
 
 const db = mysql.createConnection({
-    host: "finalprojectdbzxc.database.windows.net", // Azure MySQL server name
-    user: "admin01", // Azure MySQL username
-    password: "Denreldie10102004", // Azure MySQL password
-    database: "finalprojectdb", // Your database name
-    ssl: {
-      rejectUnauthorized: false // Ensure SSL is enabled
-    }
+  host: "finalprojectdbzxc.database.windows.net", // Azure MySQL server name
+  user: "admin01", // Azure MySQL username
+  password: "Denreldie10102004", // Azure MySQL password
+  database: "finalprojectdb", // Your database name
+  ssl: {
+    rejectUnauthorized: false, // Ensure SSL is enabled
+  },
 });
 
 db.connect((err) => {
