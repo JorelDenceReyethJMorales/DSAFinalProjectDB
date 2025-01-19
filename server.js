@@ -1,71 +1,68 @@
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2");
+const sql = require("mssql"); // Import the mssql package
 
 const app = express();
-const port = process.env.PORT || 5000; // Use environment-defined port
+const port = process.env.PORT || 8080; // Use the PORT environment variable if set, otherwise default to 8080
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
-const db = mysql.createConnection({
-  host: "finalprojectdbzxc.database.windows.net", // Azure MySQL server name
-  user: "admin01", // Azure MySQL username
-  password: "Denreldie10102004", // Azure MySQL password
+// Azure SQL connection configuration
+const dbConfig = {
+  user: "admin01", // Azure SQL username
+  password: "Denreldie10102004", // Azure SQL password
+  server: "finalprojectdbzxc.database.windows.net", // Azure SQL server name
   database: "finalprojectdb", // Your database name
-  ssl: {
-    rejectUnauthorized: false, // Ensure SSL is enabled
+  options: {
+    encrypt: true, // Use encryption
+    trustServerCertificate: false, // Set to true if you face certificate issues
   },
-});
-
-db.connect((err) => {
-  if (err) {
-    console.error("Error connecting to MySQL:", err.stack);
-    return;
-  }
-  console.log("Connected to MySQL as id " + db.threadId);
-});
+};
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Welcome route
-app.get("/", (req, res) => {
-  res.send("Welcome to the Backend !");
-});
-
 // Route to get all posts
-app.get("/", (req, res) => {
-  db.query("SELECT * FROM posts ORDER BY date DESC", (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json(rows);
-  });
+app.get("/posts", async (req, res) => {
+  try {
+    const pool = await sql.connect(dbConfig); // Connect to Azure SQL
+    const result = await pool
+      .request()
+      .query("SELECT * FROM posts ORDER BY date DESC");
+    res.json(result.recordset); // Return the query results
+  } catch (err) {
+    console.error("Error querying the database:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Route to create a new post
-app.post("/posts", (req, res) => {
+app.post("/posts", async (req, res) => {
   const { from, to, content, date } = req.body;
 
-  // Insert the new post into the database
-  const query =
-    "INSERT INTO posts (from_name, to_name, content, date) VALUES (?, ?, ?, ?)";
-  db.query(query, [from, to, content, date], (err, result) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
+  try {
+    const pool = await sql.connect(dbConfig); // Connect to Azure SQL
+    const result = await pool
+      .request()
+      .input("from", sql.NVarChar, from)
+      .input("to", sql.NVarChar, to)
+      .input("content", sql.NVarChar, content)
+      .input("date", sql.DateTime, date)
+      .query(
+        "INSERT INTO posts (from_name, to_name, content, date) VALUES (@from, @to, @content, @date)"
+      );
+
     res.status(201).json({
-      id: result.insertId,
+      id: result.rowsAffected[0], // Get the affected row count or you can get the inserted ID if needed
       from,
       to,
       content,
       date,
     });
-  });
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  } catch (err) {
+    console.error("Error inserting into the database:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
