@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const sql = require("mssql"); // Import the mssql package
+const sql = require("mssql");
 
 const app = express();
 const port = process.env.PORT || 8080; // Use the PORT environment variable if set, otherwise default to 8080
@@ -16,7 +16,7 @@ const dbConfig = {
   database: "finalprojectdb", // Your database name
   options: {
     encrypt: true, // Use encryption
-    trustServerCertificate: false, // Set to true if you face certificate issues
+    trustServerCertificate: true, // Set to true to bypass SSL certificate validation
   },
 };
 
